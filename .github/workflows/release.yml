@@ -76,6 +76,9 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
           kc="$RUNNER_TEMP/signing.keychain-db"
@@ -92,16 +95,18 @@ jobs:
           # cargo-packager takes the identity from Cargo.toml (ad-hoc "-" by default).
           sed -i '' "s|^signing-identity = \"-\"|signing-identity = \"$APPLE_SIGNING_IDENTITY\"|" crates/pabaru-gui/Cargo.toml
           grep -n '^signing-identity' crates/pabaru-gui/Cargo.toml
+          # cargo-packager notarizes and staples the .app when these are set. They must
+          # not exist at all otherwise (an empty value still triggers notarization).
+          {
+            echo "APPLE_ID=$APPLE_ID"
+            echo "APPLE_PASSWORD=$APPLE_PASSWORD"
+            echo "APPLE_TEAM_ID=$APPLE_TEAM_ID"
+          } >> "$GITHUB_ENV"
           # The standalone CLI binary (pabaru-cli-*.tar.gz) is signed here.
           codesign --force --timestamp --options runtime --sign "$APPLE_SIGNING_IDENTITY" \
             "target/${{ matrix.target }}/release/pabaru"
 
       - name: Package
-        env:
-          # Used by cargo-packager to notarize and staple the .app (macOS, when signing).
-          APPLE_ID: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_ID || '' }}
-          APPLE_PASSWORD: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_TEAM_ID || '' }}
         run: cargo packager --release --target ${{ matrix.target }} -p pabaru-gui --formats ${{ matrix.formats }}
 
       # Windows code signing is not set up yet: add
