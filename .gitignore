@@ -1,0 +1,11 @@
+/target
+*.pdf
+*.png
+!tests/fixtures/**
+!docs/img/**
+!assets/**
+/target-main
+*.stackdump
+/input
+/dist
+/THIRD_PARTY_LICENSES.html

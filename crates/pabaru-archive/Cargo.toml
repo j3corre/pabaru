@@ -1,0 +1,22 @@
+[package]
+name = "pabaru-archive"
+description = "File and folder packaging for Pabaru: tar + zstd + BLAKE3 manifest"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+zstd.workspace = true
+tar.workspace = true
+walkdir.workspace = true
+blake3.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,0 +1,17 @@
+[package]
+name = "pabaru-render"
+description = "Rendering of Pabaru pages into a 1-bit bitmap and PNG/PDF export"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+pabaru-format.workspace = true
+pabaru-layout.workspace = true
+thiserror.workspace = true
+png.workspace = true
+flate2.workspace = true

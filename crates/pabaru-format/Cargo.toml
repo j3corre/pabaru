@@ -1,0 +1,18 @@
+[package]
+name = "pabaru-format"
+description = "Pabaru v1 binary format: blocks, superblock, CRC, whitening"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+pabaru-ecc.workspace = true
+thiserror.workspace = true
+crc32c.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

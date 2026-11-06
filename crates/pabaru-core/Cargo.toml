@@ -1,0 +1,38 @@
+[package]
+name = "pabaru-core"
+description = "Pabaru pipeline: backup to paper and restore from scans (shared API for the CLI and GUI)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+pabaru-format.workspace = true
+pabaru-ecc.workspace = true
+pabaru-archive.workspace = true
+pabaru-crypto.workspace = true
+pabaru-layout.workspace = true
+pabaru-render.workspace = true
+lopdf.workspace = true
+image.workspace = true
+pabaru-scan.workspace = true
+thiserror.workspace = true
+blake3.workspace = true
+rand.workspace = true
+tempfile.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+# Test vectors in docs/SPEC.md (tests/spec_vectors.rs).
+argon2.workspace = true
+chacha20poly1305.workspace = true
+crc32c.workspace = true
+reed-solomon-simd.workspace = true
+zstd.workspace = true
+pabaru-scan.workspace = true
+pabaru-render.workspace = true
+lopdf.workspace = true
+image.workspace = true

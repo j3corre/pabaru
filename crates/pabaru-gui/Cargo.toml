@@ -1,0 +1,67 @@
+[package]
+name = "pabaru-gui"
+description = "Pabaru desktop GUI – data backup to paper"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "pabaru-gui"
+path = "src/main.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+pabaru-core.workspace = true
+eframe = { version = "0.37", default-features = false, features = ["default_fonts", "glow", "persistence", "wayland", "x11", "accesskit", "clipboard"] }
+# Emoji font (icons 📁 🔒 …) – egui 0.37 no longer ships it in the default fonts.
+egui = { version = "0.37", features = ["monochrome_emoji_fonts"] }
+rfd = "0.17"
+sys-locale = "0.3"
+
+[dev-dependencies]
+egui_kittest = { version = "0.37", features = ["eframe", "wgpu"] }
+image.workspace = true
+tempfile.workspace = true
+
+# Installation packages: build pabaru-gui and pabaru-cli in release mode, generate
+# THIRD_PARTY_LICENSES.html (cargo about), then `cargo packager --release -p pabaru-gui`.
+# CI does this in .github/workflows/release.yml.
+[package.metadata.packager]
+product-name = "Pabaru"
+identifier = "cz.kitai.pabaru"
+publisher = "Jan Bláha"
+copyright = "Copyright (c) 2026 Jan Bláha. MIT OR Apache-2.0."
+category = "Utility"
+description = "Back up files and folders to paper and restore them from scans"
+long-description = """
+Pabaru backs up files and whole folders onto plain paper as a dense grid of dots \
+and restores them from scans. Two-level error correction, optional encryption, \
+resistant to crumpled and torn pages. Includes the `pabaru` command-line tool."""
+homepage = "https://pabaru.kitai.cz"
+license-file = "../../LICENSE-MIT"
+icons = ["../../assets/icon.png", "../../assets/icon.icns", "../../assets/icon.ico"]
+binaries = [{ path = "pabaru-gui", main = true }, { path = "pabaru" }]
+resources = [
+  "../../README.md",
+  "../../CHANGELOG.md",
+  "../../LICENSE-MIT",
+  "../../LICENSE-APACHE",
+  "../../docs/SPEC.md",
+  "../../THIRD_PARTY_LICENSES.html",
+]
+
+[package.metadata.packager.macos]
+minimum-system-version = "11.0"
+
+[package.metadata.packager.deb]
+section = "utils"
+depends = ["libxkbcommon0", "libgl1"]
+
+[package.metadata.packager.nsis]
+installer-mode = "currentUser"

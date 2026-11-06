@@ -1,0 +1,150 @@
+# Release: builds installation packages for macOS, Windows and Linux.
+# - push of a tag `v*`  → packages are attached to a draft GitHub Release
+#                          (check it, then click "Publish release")
+# - manual run           → packages are only uploaded as workflow artifacts
+# Asset names carry no version, so the website can link to
+# https://github.com/j3corre/pabaru/releases/latest/download/<name>.
+name: Release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  package:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x64
+            os: ubuntu-22.04 # older glibc → runs on more distributions
+            target: x86_64-unknown-linux-gnu
+            formats: deb,appimage
+          - name: windows-x64
+            os: windows-2022
+            target: x86_64-pc-windows-msvc
+            formats: nsis,wix
+          - name: macos-arm64
+            os: macos-latest
+            target: aarch64-apple-darwin
+            formats: dmg
+          - name: macos-x64
+            os: macos-latest # cross-compiled from Apple Silicon
+            target: x86_64-apple-darwin
+            formats: dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System libraries (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libxcb-render0-dev libxcb-shape0-dev \
+            libxcb-xfixes0-dev libgl1-mesa-dev libfuse2 file
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-packager,cargo-about
+
+      - name: Third-party licenses
+        run: cargo about generate about.hbs -o THIRD_PARTY_LICENSES.html
+
+      - name: Build
+        run: cargo build --release --locked --target ${{ matrix.target }} -p pabaru-gui -p pabaru-cli
+
+      - name: Package
+        run: cargo packager --release --target ${{ matrix.target }} -p pabaru-gui --formats ${{ matrix.formats }}
+
+      # Code signing is not set up yet. To add it later:
+      # - macOS: secrets APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+      #   APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID (cargo-packager reads them and notarizes).
+      # - Windows: [package.metadata.packager.windows] sign-command = "..." with a certificate secret.
+
+      - name: Collect packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="target/${{ matrix.target }}/release"
+          mkdir dist
+          case "${{ matrix.name }}" in
+            linux-x64)
+              cp "$out"/*.deb      dist/pabaru_amd64.deb
+              cp "$out"/*.AppImage dist/Pabaru-x86_64.AppImage ;;
+            windows-x64)
+              cp "$out"/*-setup.exe dist/Pabaru-windows-x64-setup.exe
+              cp "$out"/*.msi       dist/Pabaru-windows-x64.msi ;;
+            macos-arm64)
+              cp "$out"/*.dmg dist/Pabaru-macos-arm64.dmg ;;
+            macos-x64)
+              cp "$out"/*.dmg dist/Pabaru-macos-x64.dmg ;;
+          esac
+
+          # Command-line tool only (for servers and scripts).
+          ext=""; [ "${{ runner.os }}" = "Windows" ] && ext=".exe"
+          cli="pabaru-cli-${{ matrix.target }}"
+          mkdir "$cli"
+          cp "$out/pabaru$ext" README.md CHANGELOG.md LICENSE-MIT LICENSE-APACHE \
+             docs/SPEC.md THIRD_PARTY_LICENSES.html "$cli/"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a "dist/$cli.zip" "$cli" > /dev/null
+          else
+            tar czf "dist/$cli.tar.gz" "$cli"
+          fi
+          ls -la dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pabaru-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        run: cd dist && sha256sum * > SHA256SUMS && cat SHA256SUMS
+      - name: Release notes from CHANGELOG.md
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="$version" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          cat >> notes.md <<'EOF'
+
+          ### Downloads
+          macOS: `Pabaru-macos-arm64.dmg` (Apple Silicon) or `Pabaru-macos-x64.dmg` (Intel) ·
+          Windows: `Pabaru-windows-x64-setup.exe` or `.msi` ·
+          Linux: `pabaru_amd64.deb` or `Pabaru-x86_64.AppImage` ·
+          CLI only: `pabaru-cli-<target>`.
+
+          The packages are not code-signed yet – see the README for how to open them.
+          EOF
+      - uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          body_path: notes.md
+          files: dist/*

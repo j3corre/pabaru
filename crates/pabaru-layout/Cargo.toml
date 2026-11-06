@@ -1,0 +1,17 @@
+[package]
+name = "pabaru-layout"
+description = "Pabaru page geometry, block-to-page distribution and parameter optimizer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+pabaru-format.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

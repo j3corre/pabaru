@@ -1,0 +1,17 @@
+[package]
+name = "pabaru-ecc"
+description = "Error-correcting codes for Pabaru: inner Reed-Solomon over GF(256) and outer erasure code"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+reed-solomon-simd.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
