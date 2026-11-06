@@ -44,7 +44,8 @@ Pabaru backs up files and whole folders onto plain paper as a dense grid of dots
 and restores them from scans. Two-level error correction, optional encryption, \
 resistant to crumpled and torn pages. Includes the `pabaru` command-line tool."""
 homepage = "https://pabaru.kitai.cz"
-license-file = "../../LICENSE-MIT"
+# RTF with \u escapes: the dmg/msi/NSIS license dialogs show UTF-8 text as mojibake.
+license-file = "../../assets/LICENSE.rtf"
 icons = ["../../assets/icon.png", "../../assets/icon.icns", "../../assets/icon.ico"]
 binaries = [{ path = "pabaru-gui", main = true }, { path = "pabaru" }]
 resources = [
@@ -58,6 +59,9 @@ resources = [
 
 [package.metadata.packager.macos]
 minimum-system-version = "11.0"
+# Ad-hoc signature of the whole bundle. Without it a downloaded (quarantined) app
+# is reported as "damaged". Real signing + notarization: see release.yml.
+signing-identity = "-"
 
 [package.metadata.packager.deb]
 section = "utils"

@@ -2,6 +2,11 @@
 
 All notable changes to Pabaru. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.1] – 2026-11-06
+### Fixed
+- macOS: the app from the `.dmg` could not be opened ("damaged"); the whole app bundle is now ad-hoc signed.
+- Installers (macOS `.dmg`, Windows `.msi` and setup `.exe`): the license dialog showed broken characters instead of "á"; the license is now shipped as RTF.
+
 ## [0.3.0] – 2026-11-06 – first public release
 ### Privacy
 - The manifest stores only root names inside the archive, no original absolute paths. Restoring "to the original location" was removed. Older backups with the `original` field can still be read (the field is ignored).
@@ -48,4 +53,5 @@ Known limits: strong crumpling with fine dots (200 dpi) can't be read – hence 
 - Desktop GUI (egui) with drag & drop, layout proposals, preview, PDF/PNG export and restore; tested with `egui_kittest`.
 - Scan decoder (frame, grid, homography, sampling) and a print/scan simulator for tests.
 
+[0.3.1]: https://github.com/j3corre/pabaru/releases/tag/v0.3.1
 [0.3.0]: https://github.com/j3corre/pabaru/releases/tag/v0.3.0

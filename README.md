@@ -34,7 +34,7 @@ Download a package for your system from [Releases](https://github.com/j3corre/pa
 | CLI only | `pabaru-cli-<target>.tar.gz` / `.zip` |
 
 The packages are **not code-signed** yet:
-- **macOS:** right-click the app → *Open*, or *System Settings → Privacy & Security → Open Anyway*. Alternatively: `xattr -dr com.apple.quarantine /Applications/Pabaru.app`.
+- **macOS:** open the app once; when macOS says it can't verify the developer, go to *System Settings → Privacy & Security* and click *Open Anyway* (on macOS 14 and older, right-click the app → *Open* also works). Alternatively: `xattr -dr com.apple.quarantine /Applications/Pabaru.app`.
 - **Windows:** in the SmartScreen dialog click *More info → Run anyway*.
 - **Linux:** `sudo apt install ./pabaru_amd64.deb`, or `chmod +x Pabaru-x86_64.AppImage` and run it.
 
