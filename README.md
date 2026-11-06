@@ -34,7 +34,7 @@ Download a package for your system from [Releases](https://github.com/j3corre/pa
 | CLI only | `pabaru-cli-<target>.tar.gz` / `.zip` |
 
 The packages are **not code-signed** yet:
-- **macOS:** the current build is not notarized yet and recent macOS versions refuse to open it from the Finder. After copying it to Applications, run once: `xattr -dr com.apple.quarantine /Applications/Pabaru.app`. Signed and notarized builds are set up in [docs/RELEASING.md](docs/RELEASING.md).
+- **macOS:** the current build is not notarized yet and recent macOS versions refuse to open it from the Finder. After copying it to Applications, run once: `xattr -dr com.apple.quarantine /Applications/Pabaru.app`. Signed and notarized builds will follow.
 - **Windows:** in the SmartScreen dialog click *More info → Run anyway*.
 - **Linux:** `sudo apt install ./pabaru_amd64.deb`, or `chmod +x Pabaru-x86_64.AppImage` and run it.
 
@@ -125,7 +125,6 @@ Release packages are built by GitHub Actions ([.github/workflows/release.yml](.g
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – architecture
 - [CHANGELOG.md](CHANGELOG.md) – version history
 - [CONTRIBUTING.md](CONTRIBUTING.md) – how to contribute
-- [docs/RELEASING.md](docs/RELEASING.md) – making a release, macOS signing and notarization
 
 ## License
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.

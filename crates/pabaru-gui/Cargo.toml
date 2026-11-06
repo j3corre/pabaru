@@ -61,7 +61,7 @@ resources = [
 minimum-system-version = "11.0"
 # Ad-hoc signature of the whole bundle. Without it a downloaded (quarantined) app
 # is reported as "damaged". For distribution CI replaces it with the Developer ID
-# identity and notarizes (docs/RELEASING.md).
+# identity from the APPLE_* secrets and notarizes (.github/workflows/release.yml).
 signing-identity = "-"
 
 [package.metadata.packager.deb]

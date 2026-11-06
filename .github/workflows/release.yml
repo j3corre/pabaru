@@ -41,8 +41,9 @@ jobs:
             formats: dmg
     runs-on: ${{ matrix.os }}
     env:
-      # macOS signing + notarization runs only when the Apple secrets are set
-      # (see docs/RELEASING.md); otherwise the app is only ad-hoc signed.
+      # macOS signing + notarization runs only when the Apple secrets are set:
+      # APPLE_CERTIFICATE (base64 .p12), APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
+      # APPLE_ID, APPLE_PASSWORD (app-specific), APPLE_TEAM_ID. Otherwise ad-hoc signed.
       MACOS_SIGN: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
     steps:
       - uses: actions/checkout@v4
