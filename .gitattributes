@@ -1,0 +1,5 @@
+# Keep LF everywhere (docs/SPEC.md is compared byte for byte by the test vectors).
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.icns binary

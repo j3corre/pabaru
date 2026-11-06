@@ -48,7 +48,11 @@ fn unhex(s: &str) -> Vec<u8> {
 }
 
 /// The specification itself: every vector must appear in it verbatim.
-const SPEC: &str = include_str!("../../../docs/SPEC.md");
+const SPEC_RAW: &str = include_str!("../../../docs/SPEC.md");
+
+/// SPEC.md with `\n` line endings (a Windows checkout may have `\r\n`).
+static SPEC: std::sync::LazyLock<String> =
+    std::sync::LazyLock::new(|| SPEC_RAW.replace("\r\n", "\n"));
 
 fn printing() -> bool {
     std::env::var_os("PABARU_SPEC_PRINT").is_some()
