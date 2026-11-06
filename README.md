@@ -125,6 +125,7 @@ Release packages are built by GitHub Actions ([.github/workflows/release.yml](.g
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) – architecture
 - [CHANGELOG.md](CHANGELOG.md) – version history
 - [CONTRIBUTING.md](CONTRIBUTING.md) – how to contribute
+- [docs/RELEASING.md](docs/RELEASING.md) – making a release, macOS signing and notarization
 
 ## License
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.

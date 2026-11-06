@@ -40,6 +40,10 @@ jobs:
             target: x86_64-apple-darwin
             formats: dmg
     runs-on: ${{ matrix.os }}
+    env:
+      # macOS signing + notarization runs only when the Apple secrets are set
+      # (see docs/RELEASING.md); otherwise the app is only ad-hoc signed.
+      MACOS_SIGN: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -66,13 +70,42 @@ jobs:
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }} -p pabaru-gui -p pabaru-cli
 
+      - name: Import Developer ID certificate (macOS)
+        if: runner.os == 'macOS' && env.MACOS_SIGN == 'true'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+        run: |
+          set -euo pipefail
+          kc="$RUNNER_TEMP/signing.keychain-db"
+          pw="$(openssl rand -hex 16)"
+          security create-keychain -p "$pw" "$kc"
+          security set-keychain-settings -lut 21600 "$kc"
+          security unlock-keychain -p "$pw" "$kc"
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security import "$RUNNER_TEMP/cert.p12" -k "$kc" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          rm "$RUNNER_TEMP/cert.p12"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$pw" "$kc" > /dev/null
+          security list-keychains -d user -s "$kc" $(security list-keychains -d user | tr -d '"')
+          security find-identity -v -p codesigning "$kc"
+          # cargo-packager takes the identity from Cargo.toml (ad-hoc "-" by default).
+          sed -i '' "s|^signing-identity = \"-\"|signing-identity = \"$APPLE_SIGNING_IDENTITY\"|" crates/pabaru-gui/Cargo.toml
+          grep -n '^signing-identity' crates/pabaru-gui/Cargo.toml
+          # The standalone CLI binary (pabaru-cli-*.tar.gz) is signed here.
+          codesign --force --timestamp --options runtime --sign "$APPLE_SIGNING_IDENTITY" \
+            "target/${{ matrix.target }}/release/pabaru"
+
       - name: Package
+        env:
+          # Used by cargo-packager to notarize and staple the .app (macOS, when signing).
+          APPLE_ID: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_ID || '' }}
+          APPLE_PASSWORD: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ env.MACOS_SIGN == 'true' && secrets.APPLE_TEAM_ID || '' }}
         run: cargo packager --release --target ${{ matrix.target }} -p pabaru-gui --formats ${{ matrix.formats }}
 
-      # Code signing is not set up yet. To add it later:
-      # - macOS: secrets APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY,
-      #   APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID (cargo-packager reads them and notarizes).
-      # - Windows: [package.metadata.packager.windows] sign-command = "..." with a certificate secret.
+      # Windows code signing is not set up yet: add
+      # [package.metadata.packager.windows] sign-command = "..." with a certificate secret.
 
       - name: Collect packages
         shell: bash
@@ -105,6 +138,38 @@ jobs:
             tar czf "dist/$cli.tar.gz" "$cli"
           fi
           ls -la dist
+
+      - name: Sign, notarize and check the dmg and CLI (macOS)
+        if: runner.os == 'macOS' && env.MACOS_SIGN == 'true'
+        env:
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          notarize() {
+            xcrun notarytool submit "$1" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
+              --team-id "$APPLE_TEAM_ID" --wait --timeout 30m
+          }
+          dmg=$(ls dist/*.dmg)
+          codesign --force --timestamp --sign "$APPLE_SIGNING_IDENTITY" "$dmg"
+          notarize "$dmg"
+          xcrun stapler staple "$dmg"
+          spctl -a -t open --context context:primary-signature -vv "$dmg"
+
+          # The app inside must be accepted by Gatekeeper (Developer ID + notarized).
+          mnt="$(mktemp -d)"
+          yes | hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
+          spctl -a -t exec -vv "$mnt/Pabaru.app"
+          xcrun stapler validate "$mnt/Pabaru.app"
+          hdiutil detach "$mnt" > /dev/null
+
+          # CLI: notarize the signed binary (a bare binary can't be stapled;
+          # Gatekeeper looks the ticket up online).
+          cli="pabaru-cli-${{ matrix.target }}"
+          ditto -c -k "target/${{ matrix.target }}/release/pabaru" "$RUNNER_TEMP/$cli.zip"
+          notarize "$RUNNER_TEMP/$cli.zip"
 
       - uses: actions/upload-artifact@v4
         with:
