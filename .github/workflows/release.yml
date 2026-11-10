@@ -46,7 +46,7 @@ jobs:
       # APPLE_ID, APPLE_PASSWORD (app-specific), APPLE_TEAM_ID. Otherwise ad-hoc signed.
       MACOS_SIGN: ${{ secrets.APPLE_SIGNING_IDENTITY != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: System libraries (Linux)
         if: runner.os == 'Linux'
@@ -177,7 +177,7 @@ jobs:
           ditto -c -k "target/${{ matrix.target }}/release/pabaru" "$RUNNER_TEMP/$cli.zip"
           notarize "$RUNNER_TEMP/$cli.zip"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: pabaru-${{ matrix.name }}
           path: dist/*
@@ -188,8 +188,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v7
         with:
           path: dist
           merge-multiple: true
@@ -213,7 +213,7 @@ jobs:
 
           The packages are not code-signed yet – see the README for how to open them.
           EOF
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           draft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
