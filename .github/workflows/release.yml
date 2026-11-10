@@ -227,7 +227,8 @@ jobs:
           Linux: `pabaru_amd64.deb` or `Pabaru-x86_64.AppImage` ·
           CLI only: `pabaru-cli-<target>`.
 
-          The packages are not code-signed yet – see the README for how to open them.
+          macOS packages are signed and notarized. Windows installers are not code-signed
+          yet – in the SmartScreen dialog click *More info → Run anyway*.
           EOF
       - uses: softprops/action-gh-release@v3
         with:

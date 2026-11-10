@@ -2,6 +2,10 @@
 
 All notable changes to Pabaru. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.2] – 2026-11-11
+### Fixed
+- macOS: the app is now signed with a Developer ID and notarized by Apple, so it opens with a double-click (recent macOS versions refused to open the ad-hoc signed 0.3.1).
+
 ## [0.3.1] – 2026-11-06
 ### Fixed
 - macOS: the app from the `.dmg` could not be opened ("damaged"); the whole app bundle is now ad-hoc signed.
@@ -53,5 +57,6 @@ Known limits: strong crumpling with fine dots (200 dpi) can't be read – hence 
 - Desktop GUI (egui) with drag & drop, layout proposals, preview, PDF/PNG export and restore; tested with `egui_kittest`.
 - Scan decoder (frame, grid, homography, sampling) and a print/scan simulator for tests.
 
+[0.3.2]: https://github.com/j3corre/pabaru/releases/tag/v0.3.2
 [0.3.1]: https://github.com/j3corre/pabaru/releases/tag/v0.3.1
 [0.3.0]: https://github.com/j3corre/pabaru/releases/tag/v0.3.0

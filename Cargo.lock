@@ -2793,7 +2793,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-archive"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "blake3",
  "serde",
@@ -2807,7 +2807,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-cli"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -2821,7 +2821,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-core"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "argon2",
  "blake3",
@@ -2846,7 +2846,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-crypto"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "argon2",
  "chacha20poly1305",
@@ -2856,7 +2856,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-ecc"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "proptest",
  "reed-solomon-simd",
@@ -2865,7 +2865,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-format"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "crc32c",
  "pabaru-ecc",
@@ -2875,7 +2875,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-gui"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "eframe",
  "egui",
@@ -2889,7 +2889,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-layout"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "pabaru-format",
  "proptest",
@@ -2898,7 +2898,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-render"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "flate2",
  "pabaru-format",
@@ -2909,7 +2909,7 @@ dependencies = [
 
 [[package]]
 name = "pabaru-scan"
-version = "0.3.1"
+version = "0.3.2"
 dependencies = [
  "image",
  "lopdf",

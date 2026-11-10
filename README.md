@@ -33,9 +33,9 @@ Download a package for your system from [Releases](https://github.com/j3corre/pa
 | Linux | `pabaru_amd64.deb` or `Pabaru-x86_64.AppImage` |
 | CLI only | `pabaru-cli-<target>.tar.gz` / `.zip` |
 
-The packages are **not code-signed** yet:
-- **macOS:** the current build is not notarized yet and recent macOS versions refuse to open it from the Finder. After copying it to Applications, run once: `xattr -dr com.apple.quarantine /Applications/Pabaru.app`. Signed and notarized builds will follow.
-- **Windows:** in the SmartScreen dialog click *More info → Run anyway*.
+Opening the packages:
+- **macOS:** open the `.dmg` and drag Pabaru to Applications. The app is signed and notarized by Apple.
+- **Windows:** the installers are not code-signed yet; in the SmartScreen dialog click *More info → Run anyway*.
 - **Linux:** `sudo apt install ./pabaru_amd64.deb`, or `chmod +x Pabaru-x86_64.AppImage` and run it.
 
 The desktop packages also contain the `pabaru` command-line tool (on macOS it is at `/Applications/Pabaru.app/Contents/MacOS/pabaru`).
