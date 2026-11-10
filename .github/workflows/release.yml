@@ -154,9 +154,23 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
+          auth=(--apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID")
+          # Submit, then wait separately with retries: runner network hiccups during
+          # the (sometimes long) wait must not fail the build.
           notarize() {
-            xcrun notarytool submit "$1" --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" \
-              --team-id "$APPLE_TEAM_ID" --wait --timeout 30m
+            local id status i
+            id=$(xcrun notarytool submit "$1" "${auth[@]}" --output-format json | jq -r .id)
+            echo "Submitted $1 as $id"
+            for i in 1 2 3 4 5; do
+              xcrun notarytool wait "$id" "${auth[@]}" --timeout 2h && break
+              echo "wait failed (attempt $i), retrying in 30 s"; sleep 30
+            done
+            status=$(xcrun notarytool info "$id" "${auth[@]}" --output-format json | jq -r .status)
+            echo "Notarization status: $status"
+            if [ "$status" != "Accepted" ]; then
+              xcrun notarytool log "$id" "${auth[@]}" || true
+              return 1
+            fi
           }
           dmg=$(ls dist/*.dmg)
           codesign --force --timestamp --sign "$APPLE_SIGNING_IDENTITY" "$dmg"
@@ -166,7 +180,9 @@ jobs:
 
           # The app inside must be accepted by Gatekeeper (Developer ID + notarized).
           mnt="$(mktemp -d)"
-          yes | hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
+          # `yes` answers the license prompt; it dies of SIGPIPE afterwards, which pipefail
+          # would otherwise treat as a failure.
+          { yes 2>/dev/null || true; } | hdiutil attach -nobrowse -readonly -mountpoint "$mnt" "$dmg" > /dev/null
           spctl -a -t exec -vv "$mnt/Pabaru.app"
           xcrun stapler validate "$mnt/Pabaru.app"
           hdiutil detach "$mnt" > /dev/null
